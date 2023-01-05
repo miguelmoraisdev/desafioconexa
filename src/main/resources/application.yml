@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+
+spring:
+  cloud:
+    openfeign:
+      compression:
+        request:
+          mime-types: text/xml,application/xml,application/json
