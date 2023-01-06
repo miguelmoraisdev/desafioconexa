@@ -15,7 +15,7 @@ import java.text.ParseException;
 
 
 @RestController
-@RequestMapping(value = "/movie")
+@RequestMapping(value = "/film")
 public class FilmController {
 
     @Autowired
@@ -23,8 +23,8 @@ public class FilmController {
 
     @GetMapping(value = "/lukeskywalker")
     public ResponseEntity<Page<FilmResponse>> getPeople(
-            @RequestParam(value = "title") String title,
-            @RequestParam(value = "episodeId") String episodeId
+            @RequestParam(value = "title", required = false) String title,
+            @RequestParam(value = "episodeId", required = false) String episodeId
     ) throws ParseException {
         return ResponseEntity.ok().body(clientService.getLukeSkywalker(title, episodeId));
     }

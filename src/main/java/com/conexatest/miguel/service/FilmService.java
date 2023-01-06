@@ -4,6 +4,9 @@ import com.conexatest.miguel.client.FeignRestClient;
 import com.conexatest.miguel.dto.Film;
 import com.conexatest.miguel.dto.FilmResponse;
 import com.conexatest.miguel.dto.People;
+import com.conexatest.miguel.service.exceptions.FeignClientException;
+import com.conexatest.miguel.service.exceptions.ParseDateException;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -20,42 +23,54 @@ public class FilmService {
     @Autowired
     private FeignRestClient feignRestClient;
 
-    public Page<FilmResponse> getLukeSkywalker(String title, String episodeId) throws ParseException {
-        People people = feignRestClient.getLukeSkywalker();
-        List<FilmResponse> listFilm = new ArrayList<>();
-        for (int i=0; i < people.getFilms().length; i++) {
-            String link = people.getFilms()[i];
-            String[] splitted = link.split("/");
-            String id = splitted[5];
-            Film film = feignRestClient.getLukeSkywalkerFilms(id);
-            listFilm.add(getFilmeResponseFromFilm(film));
+    public Page<FilmResponse> getLukeSkywalker(String title, String episodeId) {
+        try {
+            People people = feignRestClient.getLukeSkywalker();
+            List<FilmResponse> listFilm = new ArrayList<>();
+            for (int i=0; i < people.getFilms().length; i++) {
+                String link = people.getFilms()[i];
+                String[] splitted = link.split("/");
+                String id = splitted[5];
+                Film film = feignRestClient.getLukeSkywalkerFilms(id);
+                listFilm.add(getFilmeResponseFromFilm(film));
+            }
+
+            return getPagination(getFilter(title, episodeId, listFilm));
+        } catch (FeignException e) {
+            throw new FeignClientException("time out exception");
         }
 
-        return getPaginação(getFilter(title, episodeId, listFilm));
     }
 
-    protected FilmResponse getFilmeResponseFromFilm(Film film) throws ParseException {
-        return FilmResponse.builder()
-                .title(film.getTitle())
-                .episodeId(film.getEpisodeId())
-                .director(film.getDirector())
-                .releaseDate(new SimpleDateFormat("yyyy-MM-dd").parse(film.getReleaseDate()))
-                .build();
+    protected FilmResponse getFilmeResponseFromFilm(Film film) {
+        try {
+            return FilmResponse.builder()
+                    .title(film.getTitle())
+                    .episodeId(film.getEpisodeId())
+                    .director(film.getDirector())
+                    .releaseDate(new SimpleDateFormat("yyyy-MM-dd").parse(film.getReleaseDate()))
+                    .build();
+        } catch (ParseException e) {
+            throw new ParseDateException("Parse issue from release_date");
+        }
     }
 
-    protected PageImpl getPaginação(List<FilmResponse> responseList) {
+    protected PageImpl getPagination(List<FilmResponse> responseList) {
         Pageable pageable = PageRequest.ofSize(10);
         return new PageImpl<>(responseList, pageable, responseList.size());
     }
 
     protected List<FilmResponse> getFilter(String title, String epsiodeId, List<FilmResponse> filmResponses) {
         List<FilmResponse> filteredList = new ArrayList<>();
-        if (title != null && epsiodeId != null) {
-            filteredList = filmResponses.stream().filter(x -> x.getTitle().equalsIgnoreCase(title) || x.getEpisodeId().equalsIgnoreCase(epsiodeId)).toList();
-        } if (title == null) {
+        if (title == null && epsiodeId == null) {
+            filteredList = filmResponses;
+        } else if (title == null && epsiodeId != null) {
             filteredList = filmResponses.stream().filter(x -> x.getEpisodeId().equals(epsiodeId)).toList();
-        } if (epsiodeId == null) {
+        } else if (epsiodeId == null && title != null) {
             filteredList = filmResponses.stream().filter(x -> x.getTitle().equalsIgnoreCase(title)).toList();
+        } else {
+            filteredList = filmResponses.stream()
+                    .filter(x -> x.getTitle().equalsIgnoreCase(title) || x.getEpisodeId().equalsIgnoreCase(epsiodeId)).toList();
         }
         return filteredList;
     }
