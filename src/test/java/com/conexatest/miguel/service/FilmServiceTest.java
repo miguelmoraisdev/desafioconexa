@@ -3,6 +3,7 @@ package com.conexatest.miguel.service;
 import com.conexatest.miguel.client.FeignRestClient;
 import com.conexatest.miguel.dto.Film;
 import com.conexatest.miguel.dto.FilmResponse;
+import com.conexatest.miguel.dto.People;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 
 @ExtendWith(SpringExtension.class)
@@ -31,7 +34,9 @@ public class FilmServiceTest {
 
     private FilmResponse filmResponse1;
     private FilmResponse filmResponse2;
+    private People people;
     private List<FilmResponse> listClient = new ArrayList<>();
+    private String[] films = new String[1];
     private String title;
     private String episodeid;
     private Page<FilmResponse> page;
@@ -54,10 +59,27 @@ public class FilmServiceTest {
         listClient.add(filmResponse1);
         listClient.add(filmResponse2);
         page = new PageImpl<>(listClient);
-        Film.builder().director("George Lucas").episodeId("2").title("Star Wars 2").build();
+        film = Film.builder().director("George Lucas").episodeId("2").title("Star Wars 2").releaseDate("1977-05-25").build();
+        people = new People();
+        films[0] = "https://swapi.dev/api/films/2/";
+        people.setFilms(films);
 
+        when(feignRestClient.getLukeSkywalker()).thenReturn(people);
+        when(feignRestClient.getLukeSkywalkerFilms(anyString())).thenReturn(film);
     }
 
+    @Test
+    void testGetLukeSkywalker() {
+            title = "Star Wars 2";
+            Assertions.assertNotNull(filmService.getLukeSkywalker(null, null));
+            Assertions.assertNotNull(filmService.getLukeSkywalker(null, episodeid));
+            Assertions.assertNotNull(filmService.getLukeSkywalker(title, null));
+    }
+
+    @Test
+    void testGetFilmeResponseFromFilm() {
+        Assertions.assertNotNull(filmService.getFilmeResponseFromFilm(film));
+    }
 
     @Test
     void testGetPagination() {
