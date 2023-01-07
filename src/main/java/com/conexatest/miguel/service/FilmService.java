@@ -7,6 +7,7 @@ import com.conexatest.miguel.dto.People;
 import com.conexatest.miguel.service.exceptions.FeignClientException;
 import com.conexatest.miguel.service.exceptions.ParseDateException;
 import feign.FeignException;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -23,20 +24,25 @@ public class FilmService {
     @Autowired
     private FeignRestClient feignRestClient;
 
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(FilmService.class);
+
     public Page<FilmResponse> getLukeSkywalker(String title, String episodeId) {
         try {
             People people = feignRestClient.getLukeSkywalker();
+            log.info("People entity returned");
             List<FilmResponse> listFilm = new ArrayList<>();
             for (int i=0; i < people.getFilms().length; i++) {
                 String link = people.getFilms()[i];
                 String[] splitted = link.split("/");
                 String id = splitted[5];
                 Film film = feignRestClient.getLukeSkywalkerFilms(id);
+                log.info("Film returned");
                 listFilm.add(getFilmeResponseFromFilm(film));
             }
 
             return getPagination(getFilter(title, episodeId, listFilm));
         } catch (FeignException e) {
+            log.error("time out exception");
             throw new FeignClientException("time out exception");
         }
 
@@ -51,6 +57,7 @@ public class FilmService {
                     .releaseDate(new SimpleDateFormat("yyyy-MM-dd").parse(film.getReleaseDate()))
                     .build();
         } catch (ParseException e) {
+            log.error("Parse issue from release_date");
             throw new ParseDateException("Parse issue from release_date");
         }
     }
