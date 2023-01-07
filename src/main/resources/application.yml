@@ -1,7 +1,5 @@
 server:
   port: 8081
-
-
 spring:
   cloud:
     openfeign:
@@ -17,3 +15,6 @@ feign:
     site: swapdev
   url:
     site: https://swapi.dev/api/
+spring-doc:
+  swagger-ui:
+    enabled: true
