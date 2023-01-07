@@ -25,7 +25,7 @@ public class FilmController {
 
     @Operation(summary = "Luke Skywalker films", description = "Get pagination of Luke Skywalker films",tags = "Get")
     @GetMapping(value = "/lukeskywalker")
-    public ResponseEntity<Page<FilmResponse>> getPeople(
+    public ResponseEntity<Page<FilmResponse>> getFilmsByLuke(
             @Parameter(name = "Title of film", example = "A New Hope") @RequestParam(value = "title", required = false) String title,
             @Parameter(name = "Episode of film", example = "4") @RequestParam(value = "episodeId", required = false) String episodeId
     ) throws ParseException {
