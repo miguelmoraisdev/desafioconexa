@@ -8,3 +8,12 @@ spring:
       compression:
         request:
           mime-types: text/xml,application/xml,application/json
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: full
+  name:
+    site: swapdev
+  url:
+    site: https://swapi.dev/api/

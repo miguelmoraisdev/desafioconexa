@@ -6,7 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "swapdev", url = "https://swapi.dev/api/")
+@FeignClient(name = "${feign.name.site}", url = "${feign.url.site}")
 public interface FeignRestClient {
 
     @GetMapping(value = "people/1", consumes="application/json")
