@@ -10,6 +10,8 @@ O campo “release_date” vem no novo formato dd/MM/yyyy.
 
 Essa busca pode ser feita usando filtagrem pelo "title" e/ou "episodeId".
 
+Quando a apilcação [SwapiAPI]( https://swapi.dev/) não está respondendo a aplicação lança uma exception ao front com a mensagem "Time out for the client".
+
 Para esse projeto foram desenvolvidos testes unitários das camadas de service e controller.
 
 Foi utilizado a ferramenta OpenAPI (Swagger) para documentação dos endpoints da aplicaçação:
